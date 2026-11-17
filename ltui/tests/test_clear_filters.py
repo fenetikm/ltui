@@ -51,6 +51,8 @@ class ClearFiltersTest(unittest.IsolatedAsyncioTestCase):
             issues = self.app.query_one("#issues")
 
             self.app._project_filter = "p-sync"
+            self.app._hidden_states = {"backlog"}
+            self.app._hide_on = True
             await pilot.press("m")
             await pilot.press("slash", *"zzz", "enter")
             await pilot.pause(0.3)
@@ -67,6 +69,9 @@ class ClearFiltersTest(unittest.IsolatedAsyncioTestCase):
             self.assertIn("project", self.toasts[-1])
             self.assertIn("mine only", self.toasts[-1])
             self.assertIn("zzz", self.toasts[-1])
+            self.assertFalse(self.app._hide_on)
+            self.assertEqual(self.app._hidden_states, {"backlog"})  # h restores
+            self.assertIn("hidden statuses", self.toasts[-1])
 
             # the point of it: then / straight to one ticket
             await pilot.press("slash", *"core-1")

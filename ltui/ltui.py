@@ -701,7 +701,7 @@ HELP_SECTIONS = [
     ("view", [
         (("filter",), "filter issues"),
         (("toggle_mine",), "toggle mine only"),
-        (("clear_filters",), "clear every filter (project, mine, text)"),
+        (("clear_filters",), "clear every filter (project, mine, hidden, text)"),
         (("toggle_group",), "group by status / project / initiative"),
         (("toggle_sort",), "sort by recent / priority"),
         (("toggle_hidden",), "show / hide hidden statuses"),
@@ -3544,7 +3544,8 @@ class LTUI(App):
         self.render_issues()
 
     def action_clear_filters(self) -> None:
-        """Turn off every filter at once (project, mine only, the / text) so
+        """Turn off every filter at once (project, mine only, hidden
+        statuses, the / text) so
         the whole board is back, and say which ones were on."""
         cleared = []
         if self._project_filter is not None:
@@ -3555,6 +3556,11 @@ class LTUI(App):
             self._save_state()
             self._update_profile()
             cleared.append("mine only")
+        if self._hide_on and self._hidden_states:
+            # show them, but keep the chosen set: h hides them again
+            self._hide_on = False
+            self._save_state()
+            cleared.append("hidden statuses")
         f = self.query_one("#filter", FilterInput)
         if self._filter or f.value:
             cleared.append(f"text \u201c{self._filter or f.value}\u201d")
