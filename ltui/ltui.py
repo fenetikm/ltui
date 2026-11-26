@@ -10,7 +10,7 @@ WITHOUT ANY WARRANTY. Commercial licenses are available from Pantheon
 
 from __future__ import annotations
 
-__version__ = "0.17.0+fenetikm.1"
+__version__ = "0.17.0+fenetikm.2"
 
 import asyncio
 import json

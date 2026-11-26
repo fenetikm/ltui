@@ -47,6 +47,7 @@ shows a `+fenetikm` suffix on this build.
 | `C` | clear every filter at once | [#22](https://github.com/runpantheon/ltui/pull/22) |
 | modals | wrap under their own column and size to fit their content | [#23](https://github.com/runpantheon/ltui/pull/23) |
 | `y` | yank copies inside tmux too (`pbcopy` / `wl-copy` / `xclip` / `xsel`) | [#24](https://github.com/runpantheon/ltui/pull/24) |
+| `b` | hide the teams sidebar, and bring it back | [#25](https://github.com/runpantheon/ltui/pull/25) |
 
 Problems with these changes go to
 [this fork's issues](https://github.com/fenetikm/ltui/issues).
