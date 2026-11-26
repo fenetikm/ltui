@@ -508,6 +508,7 @@ DEFAULT_KEYBINDS = {
     "pick_hidden_states": (["H"], None),
     "pick_project": (["V"], None),
     "cycle_theme": (["t"], "theme"),
+    "toggle_sidebar": (["b"], None),
     "open_settings": (["comma"], None),
     "help": (["question_mark"], "help"),
     "quit": (["q"], "quit"),
@@ -711,6 +712,7 @@ HELP_SECTIONS = [
         (("toggle_hidden",), "show / hide hidden statuses"),
         (("pick_hidden_states",), "choose statuses to hide"),
         (("pick_project",), "filter to a single project"),
+        (("toggle_sidebar",), "show / hide the teams sidebar"),
         (("cycle_theme",), "cycle theme"),
         (("open_settings",), "settings"),
         (("refresh",), "refresh"),
@@ -766,6 +768,7 @@ CONFIG_TEMPLATE = """{
     "pick_hidden_states": "H",
     "pick_project": "V",
     "cycle_theme": "t",
+    "toggle_sidebar": "b",
     "open_settings": "comma",
     "help": "question_mark",
     "quit": "q",
@@ -1822,6 +1825,11 @@ class SettingsModal(ModalScreen):
             row.append(f"  {len(hidden)}", style=C_DIM)
         opts.append(Option(row, id="pref:hide"))
         opts.append(Option(Text("    choose hidden statuses…", style=C_SUB), id="pref:hide-pick"))
+        sidebar = not getattr(app, "_sidebar_hidden", False)
+        row = Text("   ")
+        row.append("● " if sidebar else "○ ", style=C_GREEN if sidebar else C_DIM)
+        row.append("teams sidebar", style=C_TEXT if sidebar else C_SUB)
+        opts.append(Option(row, id="pref:sidebar"))
         opts.append(Option(Text(" "), disabled=True))
         opts.append(Option(Text(" maintenance", style=f"bold {C_SUB}"), disabled=True))
         opts.append(Option(Text("    clear cache", style=C_SUB), id="cache:clear"))
@@ -1841,6 +1849,8 @@ class SettingsModal(ModalScreen):
             # from here would report its result back to this closing modal
             self.dismiss("pick-hidden")
             return
+        elif oid == "pref:sidebar":
+            app.action_toggle_sidebar()
         elif oid == "cache:clear":
             count = clear_cache()
             app.notify(f" cleared {count} cached file(s)")
@@ -2016,6 +2026,8 @@ class LTUI(App):
 
     #main {{ padding: 0 1 0 0; }}
     #sidebar {{ width: 24; margin: 0 0 0 1; }}
+    #main.no-sidebar {{ padding: 0 1; }}
+    #main.no-sidebar #sidebar, #main.no-sidebar #split-left {{ display: none; }}
     #split-left, #split-right {{ width: 1; height: 1fr; }}
     #split-left:hover, #split-right:hover,
     #split-left.dragging, #split-right.dragging {{ background: $ltui-border; }}
@@ -2228,6 +2240,7 @@ class LTUI(App):
         self._boot_data: dict | None = None
         self._org: str | None = None
         self._mine = load_state().get("mine", False)
+        self._sidebar_hidden = bool(load_state().get("sidebar_hidden", False))
         self._group_by = load_state().get("group_by", "status")
         if self._group_by not in GROUP_MODES:
             self._group_by = "status"
@@ -2335,6 +2348,7 @@ class LTUI(App):
             self.query_one("#sidebar").styles.width = int(w)
         if w := layout.get("detail_w"):
             self.query_one("#detail").styles.width = int(w)
+        self.query_one("#main").set_class(self._sidebar_hidden, "no-sidebar")
         self.query_one("#teams").border_title = " teams "
         self.query_one("#profile").border_title = " you "
         self.query_one("#centre").border_title = " issues "
@@ -2498,7 +2512,8 @@ class LTUI(App):
         data = load_state()
         if reset == "#sidebar":
             data.pop("sidebar_w", None)
-        else:
+        elif not self._sidebar_hidden:
+            # a hidden sidebar measures 0 wide — keep the width it reopens at
             data["sidebar_w"] = self.query_one("#sidebar").outer_size.width
         detail = self.query_one("#detail")
         if reset == "#detail":
@@ -2512,6 +2527,7 @@ class LTUI(App):
         if self._team is not None:
             data["team_id"] = self._team["id"]
         data["mine"] = self._mine
+        data["sidebar_hidden"] = self._sidebar_hidden
         data["theme"] = self.theme
         data["group_by"] = self._group_by
         data["sort_by"] = self._sort_by
@@ -3562,7 +3578,7 @@ class LTUI(App):
         fid = self.focused.id if self.focused else None
         if fid == "d-scroll":
             self.query_one("#issues", NavList).focus()
-        elif fid == "issues":
+        elif fid == "issues" and not self._sidebar_hidden:
             self.query_one("#teams", NavList).focus()
 
     def action_focus_right(self) -> None:
@@ -3643,6 +3659,12 @@ class LTUI(App):
             ),
             done,
         )
+    def action_toggle_sidebar(self) -> None:
+        self._sidebar_hidden = not self._sidebar_hidden
+        self.query_one("#main").set_class(self._sidebar_hidden, "no-sidebar")
+        if self._sidebar_hidden and self.focused is not None and self.focused.id == "teams":
+            self.query_one("#issues", NavList).focus()
+        self._save_state()
 
     def action_toggle_mine(self) -> None:
         self._mine = not self._mine
@@ -4065,6 +4087,11 @@ class LTUI(App):
 
     def get_system_commands(self, screen):
         yield from super().get_system_commands(screen)
+        yield SystemCommand(
+            "Toggle teams sidebar",
+            "show or hide the teams and profile panes",
+            self.action_toggle_sidebar,
+        )
         if LINEAR_CODING_TOOLS.exists():
             yield SystemCommand(
                 "Run custom script",

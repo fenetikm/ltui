@@ -175,6 +175,7 @@ and `?` opens the full keybinding cheatsheet whenever you need it.
 | `h`      | toggle **hidden statuses** on / off           |
 | `H`      | choose **statuses to hide** (e.g. Duplicate)  |
 | `V`      | filter to a **single project**                |
+| `b`      | show / hide the **teams sidebar**             |
 | `t`      | cycle **theme**                               |
 | `,`      | open **settings**                             |
 | `r`      | refresh                                       |
