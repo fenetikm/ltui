@@ -21,6 +21,36 @@ each app's <code>tools/screenshots.py</code> — no real tickets were harmed</su
 
 ---
 
+## about this fork
+
+This is a fork of [runpantheon/ltui](https://github.com/runpantheon/ltui).
+The `modifications` branch is upstream plus a set of changes to **ltui**
+(Linear) that are waiting in upstream pull requests. jtui and sctui are
+unchanged.
+
+```sh
+uv tool install --force "git+https://github.com/fenetikm/ltui@modifications#subdirectory=ltui"
+# or
+pipx install --force "git+https://github.com/fenetikm/ltui@modifications#subdirectory=ltui"
+```
+
+`--force` replaces an existing upstream install. To update later, run the
+same command again, or `uv tool upgrade ltui-linear`. `ltui --version`
+shows a `+fenetikm` suffix on this build.
+
+| what | change | upstream PR |
+| --- | --- | --- |
+| `H` / `h` | hide chosen statuses, and toggle them back on | [#15](https://github.com/runpantheon/ltui/pull/15) |
+| scripts | custom launch and done messages (with `{{stdout}}`), and an error toast showing stderr | [#18](https://github.com/runpantheon/ltui/pull/18) |
+| `e` | edit a ticket's description in `$VISUAL` / `$EDITOR` | [#20](https://github.com/runpantheon/ltui/pull/20) |
+| `/` in a picker | filter any picker as you type; `ctrl+n` / `ctrl+p` move | [#21](https://github.com/runpantheon/ltui/pull/21) |
+| `C` | clear every filter at once | [#22](https://github.com/runpantheon/ltui/pull/22) |
+| modals | wrap under their own column and size to fit their content | [#23](https://github.com/runpantheon/ltui/pull/23) |
+| `y` | yank copies inside tmux too (`pbcopy` / `wl-copy` / `xclip` / `xsel`) | [#24](https://github.com/runpantheon/ltui/pull/24) |
+
+Problems with these changes go to
+[this fork's issues](https://github.com/fenetikm/ltui/issues).
+
 ## pick your tracker
 
 | app | tracker | install | run |

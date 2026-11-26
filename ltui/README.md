@@ -21,6 +21,12 @@ Your whole workspace, grouped the way triage actually works —
 
 ---
 
+> [!IMPORTANT]
+> **This is the `modifications` branch of a fork**, with extra features
+> waiting in upstream pull requests. See
+> [about this fork](../README.md#about-this-fork) for what's different and
+> how to install it.
+
 > [!NOTE]
 > **not on Linear?** this repo also ships [**jtui**](../jtui/) for Jira and
 > [**sctui**](../sctui/) for Shortcut — same app, same speed, same themes.
